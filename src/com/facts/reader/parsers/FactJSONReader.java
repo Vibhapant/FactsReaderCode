@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-
 import android.util.Log;
 
 import com.facts.reader.HttpGetRequest;
@@ -17,7 +16,7 @@ public class FactJSONReader {
 
 		BufferedReader reader = null;
 
-		try {
+		try{
 			HttpGetRequest httprequest = new HttpGetRequest();
 			HttpURLConnection httpconnection = httprequest.getURLresponse(uri);
 			int urlresponseCode = httprequest.getrepcode();
@@ -29,7 +28,9 @@ public class FactJSONReader {
 			if(httpconnection!=null && (urlresponseCode == HttpURLConnection.HTTP_OK || urlresponseCode == HttpURLConnection.HTTP_ACCEPTED))
 			{
 				StringBuilder sb = new StringBuilder();
-				reader = new BufferedReader(new InputStreamReader(httpconnection.getInputStream()));
+
+				reader = new BufferedReader(new InputStreamReader(httpconnection.getInputStream(),"iso-8859-1"),8);
+
 				String line;
 				while ((line = reader.readLine()) != null) {
 					sb.append(line + "\n");
@@ -54,7 +55,5 @@ public class FactJSONReader {
 				}
 			}
 		}
-
 	}
-
 }
