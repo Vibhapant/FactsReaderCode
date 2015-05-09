@@ -10,10 +10,19 @@ public class Fact {
 	private String description;
 	private String imageHref;
 	private boolean imageurlstatus; 
+	private int productId;
 
 	public Fact() {
 		imageurlstatus= true;
 	}
+
+	public int getProductId() {
+		return productId;
+	}
+	public void setProductId(int productId) {
+		this.productId = productId;
+	}
+
 	public String getTitle() {
 		return title;
 	}

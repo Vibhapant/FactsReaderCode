@@ -3,6 +3,7 @@ package com.facts.reader;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
+
 import com.facts.reader.model.Fact;
 
 import android.app.Activity;
@@ -10,6 +11,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,11 +23,18 @@ import android.widget.TextView;
 public class FactAdapter extends ArrayAdapter<Fact> {
 	private Context context;
 	private List<Fact> factList;
+	private LruCache<Integer, Bitmap> imageCache;   
 
 	public FactAdapter(Context context, int resource, List<Fact> objects) {
 		super(context, resource, objects);
 		this.context = context;
 		this.factList = objects;
+		
+		//Calculate the available device memory
+		final int maxMemory = (int) (Runtime.getRuntime().maxMemory()/1024);
+		//calculate the Cache size;
+		final int cacheSize = maxMemory/8;
+		imageCache = new LruCache<>(cacheSize);
 	}
 
 	@Override
@@ -57,11 +66,15 @@ public class FactAdapter extends ArrayAdapter<Fact> {
 
 		//Display Facts Images in ImageView widget
 		ImageView image = (ImageView) view.findViewById(R.id.imageView);
-		if (fact.getBitmap() != null) {			
+
+		Bitmap bitmap = imageCache.get(fact.getProductId());
+
+		//Bitmap bitmap; 
+		if (bitmap  != null) {			
 			image.setImageBitmap(fact.getBitmap());
 		}
 		else if(fact.getImageurlstatus()==false||fact.getImageHref()=="null"){
-			Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.no_image_available);
+		bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.no_image_available);
 			image.setImageBitmap(bitmap);
 		}
 		else {
@@ -112,6 +125,7 @@ public class FactAdapter extends ArrayAdapter<Fact> {
 					bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.no_image_available);
 					fact.setImageurlstatus(false);
 				}
+			
 				container.bitmap = bitmap;
 				return container;
 			} 
@@ -130,7 +144,8 @@ public class FactAdapter extends ArrayAdapter<Fact> {
 		protected void onPostExecute(FactAndView result) {
 			ImageView image = (ImageView) result.view.findViewById(R.id.imageView);
 			image.setImageBitmap(result.bitmap);
-			result.fact.setBitmap(result.bitmap);
+			//result.fact.setBitmap(result.bitmap);
+			imageCache.put(result.fact.getProductId(), result.bitmap);
 		}
 	}
 }
